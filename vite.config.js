@@ -13,4 +13,16 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-stripe': ['@stripe/stripe-js'],
+          'vendor-router': ['react-router-dom'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 500,
+  },
 })
