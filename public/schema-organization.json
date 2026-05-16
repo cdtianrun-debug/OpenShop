@@ -1,0 +1,14 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "OpenShop",
+  "url": "https://scsc.qzz.io",
+  "logo": "https://scsc.qzz.io/logo.png",
+  "description": "Premium digital products marketplace offering resume templates, design assets, e-books, and video courses.",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "cdtianrun@gmail.com",
+    "contactType": "customer service"
+  },
+  "sameAs": []
+}

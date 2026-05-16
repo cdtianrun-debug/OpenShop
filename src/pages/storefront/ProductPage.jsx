@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { Navbar } from '../../components/storefront/Navbar'
 import { Footer } from '../../components/storefront/Footer'
 import { Button } from '../../components/ui/button'
@@ -67,13 +68,15 @@ export function ProductPage() {
 
   const effectivePriceCents = useMemo(() => {
     if (!product) return 0
+    // effectiveVariant.price is already in dollars (from display), multiply by 100 for cents
     if (effectiveVariant?.hasCustomPrice && typeof effectiveVariant.price === 'number') {
       return Math.round(effectiveVariant.price * 100)
     }
     if (effectiveVariant2?.hasCustomPrice && typeof effectiveVariant2.price === 'number') {
       return Math.round(effectiveVariant2.price * 100)
     }
-    return Math.round((product.price || 0) * 100)
+    // product.price is stored in cents directly in KV
+    return product.price || 0
   }, [product, effectiveVariant, effectiveVariant2])
 
   const effectiveStripePriceId = useMemo(() => {
@@ -175,6 +178,13 @@ export function ProductPage() {
       // Fallback to old system
       stripePriceIdToUse = variant?.stripePriceId || variant2?.stripePriceId || product.stripePriceId
     }
+
+    // Validate that a Stripe Price ID exists before adding to cart
+    if (!stripePriceIdToUse) {
+      alert('This product is not yet available for purchase. Please check back later.')
+      return
+    }
+
     const idSegments = [product.id]
     if (variant) idSegments.push(variant.id)
     if (variant2) idSegments.push(variant2.id)
@@ -220,8 +230,73 @@ export function ProductPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <Helmet>
+        <title>{product.name} - OpenShop | Instant Download</title>
+        <meta name="description" content={product.description?.substring(0, 155) + (product.description?.length > 155 ? '...' : '') || `Buy ${product.name} at OpenShop. Instant download after purchase.`} />
+        <meta name="keywords" content={`${product.name}, ${product.tagline || ''}, digital download, instant download, OpenShop`} />
+        <meta property="og:title" content={`${product.name} - OpenShop`} />
+        <meta property="og:description" content={product.description?.substring(0, 155) || `Buy ${product.name}. Instant download.`} />
+        <meta property="og:type" content="product" />
+        <meta property="og:url" content={`https://scsc.qzz.io/products/${product.id}`} />
+        {(product.images?.[0] || product.imageUrl) && <meta property="og:image" content={normalizeImageUrl(product.images?.[0] || product.imageUrl)} />}
+        {(product.images?.[0] || product.imageUrl) && <meta property="og:image:width" content="800" />}
+        {(product.images?.[0] || product.imageUrl) && <meta property="og:image:height" content="800" />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${product.name} - OpenShop`} />
+        <meta name="twitter:description" content={product.description?.substring(0, 155) || `Buy ${product.name}. Instant download.`} />
+        {(product.images?.[0] || product.imageUrl) && <meta name="twitter:image" content={normalizeImageUrl(product.images?.[0] || product.imageUrl)} />}
+        <link rel="canonical" href={`https://scsc.qzz.io/products/${product.id}`} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": product.name,
+          "description": product.description,
+          "image": (product.images?.[0] || product.imageUrl) ? normalizeImageUrl(product.images?.[0] || product.imageUrl) : undefined,
+          "brand": { "@type": "Brand", "name": "OpenShop" },
+          "offers": {
+            "@type": "Offer",
+            "url": `https://scsc.qzz.io/products/${product.id}`,
+            "priceCurrency": product.currency || "USD",
+            "price": product.price ? (product.price / 100).toFixed(2) : undefined,
+            "availability": product.stripePriceId ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+          }
+        }) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://scsc.qzz.io" },
+            { "@type": "ListItem", "position": 2, "name": product.collectionName || "Products", "item": product.collectionId ? `https://scsc.qzz.io/collections/${product.collectionId}` : "https://scsc.qzz.io/products" },
+            { "@type": "ListItem", "position": 3, "name": product.name, "item": `https://scsc.qzz.io/products/${product.id}` }
+          ]
+        }) }} />
+      </Helmet>
       <Navbar />
       <section className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Breadcrumb nav for SEO */}
+        <nav aria-label="Breadcrumb" className="mb-6">
+          <ol className="flex items-center gap-2 text-sm text-slate-500" itemScope itemType="https://schema.org/BreadcrumbList">
+            <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+              <Link to="/" className="hover:text-slate-700" itemProp="item"><span itemProp="name">Home</span></Link>
+              <meta itemProp="position" content="1" />
+            </li>
+            {product.collectionId && product.collectionName && (
+              <>
+                <li className="text-slate-400">/</li>
+                <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+                  <Link to={`/collections/${product.collectionId}`} className="hover:text-slate-700" itemProp="item"><span itemProp="name">{product.collectionName}</span></Link>
+                  <meta itemProp="position" content="2" />
+                </li>
+              </>
+            )}
+            <li className="text-slate-400">/</li>
+            <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+              <span itemProp="name" className="text-slate-800 font-medium" aria-current="page">{product.name}</span>
+              <meta itemProp="position" content={product.collectionId && product.collectionName ? "3" : "2"} />
+            </li>
+          </ol>
+        </nav>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div>
             <Card className="overflow-hidden">
@@ -319,7 +394,7 @@ export function ProductPage() {
             )}
             <div className="mb-8">
               <span className="text-4xl font-bold text-slate-900">
-                {formatCurrency(effectivePriceCents / 100, product.currency)}
+                {formatCurrency(effectivePriceCents, product.currency)}
               </span>
             </div>
 

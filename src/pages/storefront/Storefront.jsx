@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { Navbar } from '../../components/storefront/Navbar'
 import { Hero } from '../../components/storefront/Hero'
 import { Carousel } from '../../components/storefront/Carousel'
@@ -70,6 +71,17 @@ export function Storefront() {
 
   return (
     <div className="min-h-screen storefront-surface">
+      <Helmet>
+        <title>OpenShop - Premium Digital Products for Creators</title>
+        <meta name="description" content="Shop premium digital products including resume templates, design assets, e-books, and video courses. Instant download after purchase." />
+        <meta name="keywords" content="digital products, templates, design assets, ebooks, video courses, resume templates, pitch deck, notion templates" />
+        <meta property="og:title" content="OpenShop - Premium Digital Products" />
+        <meta property="og:description" content="Shop premium digital products. Instant download after purchase." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://scsc.qzz.io" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="canonical" href="https://scsc.qzz.io" />
+      </Helmet>
       <Navbar />
       
       {/* Hero Section */}

@@ -20,7 +20,7 @@ export class StripeService {
       name: productData.name,
       images: stripeImages.slice(0, 8),
       type: 'good',
-      tax_code: 'txcd_99999999', // Physical goods tax code
+      tax_code: 'txcd_10401100', // Digital goods tax code (e-books, digital downloads)
     }
     
     if (productData.description && String(productData.description).trim() !== '') {
@@ -84,10 +84,7 @@ export class StripeService {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'payment',
-      shipping_address_collection: {
-        allowed_countries: SHIPPING_COUNTRIES,
-      },
-      billing_address_collection: 'required',
+      billing_address_collection: 'auto',
       success_url: `${this.siteUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${this.siteUrl}/`,
     })
@@ -135,10 +132,7 @@ export class StripeService {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      shipping_address_collection: {
-        allowed_countries: SHIPPING_COUNTRIES,
-      },
-      billing_address_collection: 'required',
+      billing_address_collection: 'auto',
       success_url: `${this.siteUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${this.siteUrl}/`,
       metadata,

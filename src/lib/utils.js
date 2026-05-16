@@ -14,12 +14,23 @@ export function generateId() {
   })
 }
 
-// Format currency
+// Format currency - all prices stored in CENTS (e.g. 499 = $4.99)
+// Divide by 100 before formatting so display matches KV data
 export function formatCurrency(amount, currency = 'USD') {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency,
-  }).format(amount)
+  }).format(amount / 100)
+}
+
+// Convert cents to display dollars (for admin form display)
+export function centsToDisplay(cents) {
+  return cents ? (parseFloat(cents) / 100).toFixed(2) : ''
+}
+
+// Convert display dollars to cents (for admin form save)
+export function displayToCents(dollars) {
+  return dollars ? Math.round(parseFloat(dollars) * 100) : 0
 }
 
 // Normalize common third-party image URLs (e.g., Google Drive) to direct-view links

@@ -5,6 +5,7 @@ import { StripeService } from '../../services/StripeService.js'
 import { ProductStripeService } from '../../services/ProductStripeService.js'
 import { getKVNamespace } from '../../utils/kv.js'
 import { asyncHandler } from '../../middleware/errorHandler.js'
+import { generateId } from '../../utils/crypto.js'
 
 const router = new Hono()
 
@@ -24,16 +25,22 @@ router.post('/', asyncHandler(async (c) => {
   const stripeService = new StripeService(c.env.STRIPE_SECRET_KEY, c.env.SITE_URL)
   const productStripeService = new ProductStripeService(stripeService)
 
+  // Generate ID if not provided
+  const productWithId = {
+    ...productData,
+    id: productData.id || generateId()
+  }
+
   // Create Stripe product and prices
-  const { stripeProduct, basePrice, variantPrices } = await productStripeService.createProductWithPrices(productData)
+  const { stripeProduct, basePrice, variantPrices } = await productStripeService.createProductWithPrices(productWithId)
 
   const product = {
-    ...productData,
+    ...productWithId,
     stripePriceId: basePrice?.id || Object.values(variantPrices)[0] || '',
     stripeProductId: stripeProduct.id,
     variantPrices: variantPrices,
-    variants: Array.isArray(productData.variants) ? productData.variants : [],
-    variants2: Array.isArray(productData.variants2) ? productData.variants2 : []
+    variants: Array.isArray(productWithId.variants) ? productWithId.variants : [],
+    variants2: Array.isArray(productWithId.variants2) ? productWithId.variants2 : []
   }
 
   const savedProduct = await productService.createProduct(product)

@@ -18,7 +18,14 @@ export class KVManager {
     
     // Also update the products list
     const productIds = await this.namespace.get('products:all')
-    const existingIds = productIds ? JSON.parse(productIds) : []
+    let existingIds = []
+    if (productIds) {
+      try {
+        existingIds = JSON.parse(productIds)
+      } catch {
+        existingIds = productIds.trim().split(/\s+/)
+      }
+    }
     existingIds.push(product.id)
     await this.namespace.put('products:all', JSON.stringify(existingIds))
 
@@ -26,7 +33,14 @@ export class KVManager {
     if (productData.collectionId) {
       const collKey = `collection:products:${productData.collectionId}`
       const collProductIds = await this.namespace.get(collKey)
-      const existingCollIds = collProductIds ? JSON.parse(collProductIds) : []
+      let existingCollIds = []
+      if (collProductIds) {
+        try {
+          existingCollIds = JSON.parse(collProductIds)
+        } catch {
+          existingCollIds = collProductIds.trim().split(/\s+/)
+        }
+      }
       if (!existingCollIds.includes(productData.id)) {
         existingCollIds.push(productData.id)
         await this.namespace.put(collKey, JSON.stringify(existingCollIds))
@@ -39,7 +53,10 @@ export class KVManager {
   async getProduct(id) {
     const key = `product:${id}`
     const product = await this.namespace.get(key)
-    return product ? JSON.parse(product) : null
+    if (!product) return null
+    // Handle UTF-8 BOM that wrangler sometimes adds when writing
+    const cleaned = product.startsWith('\ufeff') ? product.slice(1) : product
+    return JSON.parse(cleaned)
   }
 
   async updateProduct(id, updates) {
@@ -63,7 +80,13 @@ export class KVManager {
         const oldCollKey = `collection:products:${existing.collectionId}`
         const oldCollProductIds = await this.namespace.get(oldCollKey)
         if (oldCollProductIds) {
-          const ids = JSON.parse(oldCollProductIds).filter(pid => pid !== id)
+          let ids
+          try {
+            ids = JSON.parse(oldCollProductIds)
+          } catch {
+            ids = oldCollProductIds.trim().split(/\s+/)
+          }
+          ids = ids.filter(pid => pid !== id)
           await this.namespace.put(oldCollKey, JSON.stringify(ids))
         }
       }
@@ -71,7 +94,14 @@ export class KVManager {
       if (updated.collectionId) {
         const newCollKey = `collection:products:${updated.collectionId}`
         const newCollProductIds = await this.namespace.get(newCollKey)
-        const ids = newCollProductIds ? JSON.parse(newCollProductIds) : []
+        let ids = []
+        if (newCollProductIds) {
+          try {
+            ids = JSON.parse(newCollProductIds)
+          } catch {
+            ids = newCollProductIds.trim().split(/\s+/)
+          }
+        }
         if (!ids.includes(id)) {
           ids.push(id)
           await this.namespace.put(newCollKey, JSON.stringify(ids))
@@ -90,7 +120,12 @@ export class KVManager {
     // Remove from products list
     const productIds = await this.namespace.get('products:all')
     if (productIds) {
-      const existingIds = JSON.parse(productIds)
+      let existingIds
+      try {
+        existingIds = JSON.parse(productIds)
+      } catch {
+        existingIds = productIds.trim().split(/\s+/)
+      }
       const filtered = existingIds.filter(pid => pid !== id)
       await this.namespace.put('products:all', JSON.stringify(filtered))
     }
@@ -100,8 +135,14 @@ export class KVManager {
       const collKey = `collection:products:${product.collectionId}`
       const collProductIds = await this.namespace.get(collKey)
       if (collProductIds) {
-        const ids = JSON.parse(collProductIds).filter(pid => pid !== id)
-        await this.namespace.put(collKey, JSON.stringify(ids))
+        let ids
+        try {
+          ids = JSON.parse(collProductIds)
+        } catch {
+          ids = collProductIds.trim().split(/\s+/)
+        }
+        const filtered = ids.filter(pid => pid !== id)
+        await this.namespace.put(collKey, JSON.stringify(filtered))
       }
     }
   }
@@ -110,7 +151,15 @@ export class KVManager {
     const productIds = await this.namespace.get('products:all')
     if (!productIds) return []
     
-    const ids = JSON.parse(productIds)
+    let ids
+    try {
+      // Try JSON first (new format)
+      ids = JSON.parse(productIds)
+    } catch {
+      // Fallback to space-separated (old format)
+      ids = productIds.trim().split(/\s+/)
+    }
+    
     const products = await Promise.all(
       ids.map(id => this.getProduct(id))
     )
@@ -124,7 +173,14 @@ export class KVManager {
     
     // Also update the collections list
     const collectionIds = await this.namespace.get('collections:all')
-    const existingIds = collectionIds ? JSON.parse(collectionIds) : []
+    let existingIds = []
+    if (collectionIds) {
+      try {
+        existingIds = JSON.parse(collectionIds)
+      } catch {
+        existingIds = collectionIds.trim().split(/\s+/)
+      }
+    }
     existingIds.push(collection.id)
     await this.namespace.put('collections:all', JSON.stringify(existingIds))
     
@@ -154,7 +210,12 @@ export class KVManager {
     // Remove from collections list
     const collectionIds = await this.namespace.get('collections:all')
     if (collectionIds) {
-      const existingIds = JSON.parse(collectionIds)
+      let existingIds
+      try {
+        existingIds = JSON.parse(collectionIds)
+      } catch {
+        existingIds = collectionIds.trim().split(/\s+/)
+      }
       const filtered = existingIds.filter(cid => cid !== id)
       await this.namespace.put('collections:all', JSON.stringify(filtered))
     }
@@ -165,24 +226,112 @@ export class KVManager {
 
   async getAllCollections() {
     const collectionIds = await this.namespace.get('collections:all')
+    console.log('getAllCollections: raw collectionIds:', collectionIds)
     if (!collectionIds) return []
     
-    const ids = JSON.parse(collectionIds)
+    let ids
+    let raw = collectionIds
+    
+    // Handle Cloudflare API response wrapper: {"value":"[...]"}
+    if (typeof raw === 'string' && raw.startsWith('{"value":')) {
+      try {
+        const wrapper = JSON.parse(raw)
+        if (wrapper.value) {
+          raw = wrapper.value
+          console.log('getAllCollections: unwrapped value:', raw)
+        }
+      } catch (e) {
+        console.log('getAllCollections: failed to unwrap:', e.message)
+      }
+    }
+    
+    try {
+      // Try JSON first (new format)
+      ids = JSON.parse(raw)
+    } catch {
+      // Fallback to space-separated (old format)
+      ids = raw.trim().split(/\s+/)
+    }
+    
+    console.log('getAllCollections: parsed ids:', ids, 'isArray:', Array.isArray(ids))
+    
+    // Ensure ids is an array
+    if (!Array.isArray(ids)) {
+      console.error('getAllCollections: ids is not an array, got:', typeof ids, ids)
+      // If it's a string, try to parse it as JSON again
+      if (typeof ids === 'string') {
+        try {
+          ids = JSON.parse(ids)
+        } catch {
+          ids = ids.trim().split(/\s+/)
+        }
+      }
+      // If still not an array, return empty
+      if (!Array.isArray(ids)) {
+        console.error('getAllCollections: failed to parse ids as array, returning empty')
+        return []
+      }
+    }
+    
     const collections = await Promise.all(
       ids.map(id => this.getCollection(id))
     )
+    console.log('getAllCollections: fetched collections count:', collections.filter(Boolean).length)
     return collections.filter(Boolean)
   }
 
   async getProductsByCollection(collectionId) {
     const collKey = `collection:products:${collectionId}`
     const productIds = await this.namespace.get(collKey)
+    console.log('getProductsByCollection: raw productIds for', collectionId, ':', productIds)
     if (!productIds) return []
 
-    const ids = JSON.parse(productIds)
+    let ids
+    let raw = productIds
+    
+    // Handle Cloudflare API response wrapper: {"value":"[...]"}
+    if (typeof raw === 'string' && raw.startsWith('{"value":')) {
+      try {
+        const wrapper = JSON.parse(raw)
+        if (wrapper.value) {
+          raw = wrapper.value
+          console.log('getProductsByCollection: unwrapped value:', raw)
+        }
+      } catch (e) {
+        console.log('getProductsByCollection: failed to unwrap:', e.message)
+      }
+    }
+
+    try {
+      // Try JSON first (new format)
+      ids = JSON.parse(raw)
+    } catch {
+      // Fallback to space-separated (old format)
+      ids = raw.trim().split(/\s+/)
+    }
+    
+    console.log('getProductsByCollection: parsed ids:', ids, 'isArray:', Array.isArray(ids))
+    
+    // Ensure ids is an array
+    if (!Array.isArray(ids)) {
+      console.error('getProductsByCollection: ids is not an array, got:', typeof ids, ids)
+      if (typeof ids === 'string') {
+        try {
+          ids = JSON.parse(ids)
+        } catch {
+          ids = ids.trim().split(/\s+/)
+        }
+      }
+      if (!Array.isArray(ids)) {
+        console.error('getProductsByCollection: failed to parse ids as array, returning empty')
+        return []
+      }
+    }
+    
     const products = await Promise.all(
       ids.map(id => this.getProduct(id))
     )
+    console.log('getProductsByCollection: fetched products count:', products.filter(Boolean).length)
     return products.filter(Boolean)
   }
 
@@ -205,7 +354,14 @@ export class KVManager {
 
     const listKey = 'media:all'
     const existing = await this.namespace.get(listKey)
-    const ids = existing ? JSON.parse(existing) : []
+    let ids = []
+    if (existing) {
+      try {
+        ids = JSON.parse(existing)
+      } catch {
+        ids = existing.trim().split(/\s+/)
+      }
+    }
     if (!ids.includes(id)) ids.push(id)
     await this.namespace.put(listKey, JSON.stringify(ids))
     return record
@@ -223,7 +379,12 @@ export class KVManager {
     const listKey = 'media:all'
     const existing = await this.namespace.get(listKey)
     if (existing) {
-      const ids = JSON.parse(existing)
+      let ids
+      try {
+        ids = JSON.parse(existing)
+      } catch {
+        ids = existing.trim().split(/\s+/)
+      }
       const next = ids.filter(mid => mid !== id)
       await this.namespace.put(listKey, JSON.stringify(next))
     }
@@ -233,7 +394,12 @@ export class KVManager {
     const listKey = 'media:all'
     const existing = await this.namespace.get(listKey)
     if (!existing) return []
-    const ids = JSON.parse(existing)
+    let ids
+    try {
+      ids = JSON.parse(existing)
+    } catch {
+      ids = existing.trim().split(/\s+/)
+    }
     const items = await Promise.all(ids.map(id => this.getMediaItem(id)))
     return items.filter(Boolean)
   }

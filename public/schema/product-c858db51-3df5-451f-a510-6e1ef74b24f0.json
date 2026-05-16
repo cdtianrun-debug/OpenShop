@@ -1,0 +1,22 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "The Complete Guide to Remote Work",
+  "description": "Comprehensive e-book covering remote work best practices, tools, and productivity tips.",
+  "url": "https://scsc.qzz.io/product/c858db51-3df5-451f-a510-6e1ef74b24f0",
+  "category": "E-Books",
+  "brand": {
+    "@type": "Brand",
+    "name": "OpenShop"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "2.99",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "seller": {
+      "@type": "Organization",
+      "name": "OpenShop"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { normalizeImageUrl } from '../../lib/utils'
 import { useParams } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { Navbar } from '../../components/storefront/Navbar'
 import { Footer } from '../../components/storefront/Footer'
 import { ProductCard } from '../../components/storefront/ProductCard'
@@ -76,6 +77,29 @@ export function CollectionPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <Helmet>
+        <title>{collection.name} - OpenShop</title>
+        <meta name="description" content={collection.description || `${collection.name} - Premium digital products for creators`} />
+        <meta property="og:title" content={`${collection.name} - OpenShop`} />
+        <meta property="og:description" content={collection.description || 'Premium digital products for creators'} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`https://scsc.qzz.io/collections/${collectionId}`} />
+        <link rel="canonical" href={`https://scsc.qzz.io/collections/${collectionId}`} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": collection.name,
+          "description": collection.description || `${collection.name} - Premium digital products`,
+          "url": `https://scsc.qzz.io/collections/${collectionId}`,
+          "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://scsc.qzz.io" },
+              { "@type": "ListItem", "position": 2, "name": collection.name, "item": `https://scsc.qzz.io/collections/${collectionId}` }
+            ]
+          }
+        }) }} />
+      </Helmet>
       <Navbar />
       
       {/* Collection Header */}

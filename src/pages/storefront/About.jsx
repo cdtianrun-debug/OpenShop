@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { Navbar } from '../../components/storefront/Navbar'
 import { Footer } from '../../components/storefront/Footer'
 import { normalizeImageUrl } from '../../lib/utils'
@@ -36,6 +37,13 @@ export function About() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <Helmet>
+        <title>About Us - OpenShop</title>
+        <meta name="description" content="Learn about OpenShop - your trusted source for premium digital products including templates, design assets, e-books, and more." />
+        <meta property="og:title" content="About Us - OpenShop" />
+        <meta property="og:description" content="Premium digital products for creators and professionals." />
+        <link rel="canonical" href="https://scsc.qzz.io/about" />
+      </Helmet>
       <Navbar />
 
       {/* Hero Section */}

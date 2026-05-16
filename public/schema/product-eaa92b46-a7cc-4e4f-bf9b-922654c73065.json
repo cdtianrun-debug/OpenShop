@@ -1,0 +1,22 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Notion Ultimate Bundle",
+  "description": "Complete Notion template bundle with 50+ templates for productivity, project management, and more.",
+  "url": "https://scsc.qzz.io/product/eaa92b46-a7cc-4e4f-bf9b-922654c73065",
+  "category": "Productivity",
+  "brand": {
+    "@type": "Brand",
+    "name": "OpenShop"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "4.99",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "seller": {
+      "@type": "Organization",
+      "name": "OpenShop"
+    }
+  }
+}

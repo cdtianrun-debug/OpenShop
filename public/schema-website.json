@@ -1,0 +1,12 @@
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "OpenShop",
+  "url": "https://scsc.qzz.io",
+  "description": "Premium digital products marketplace",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://scsc.qzz.io/search?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}

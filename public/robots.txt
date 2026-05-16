@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /faq
+Allow: /terms
+Allow: /privacy
+Allow: /products
+Allow: /collections
+Allow: /products/
+Allow: /collections/
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://scsc.qzz.io/sitemap.xml
+
+# Crawl-delay for polite bots
+Crawl-delay: 10

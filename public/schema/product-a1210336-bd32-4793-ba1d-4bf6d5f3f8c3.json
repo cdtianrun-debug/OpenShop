@@ -1,0 +1,22 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Modern Pitch Deck Template",
+  "description": "Professional pitch deck templates for startups and businesses. Impress investors with stunning presentations.",
+  "url": "https://scsc.qzz.io/product/a1210336-bd32-4793-ba1d-4bf6d5f3f8c3",
+  "category": "Templates",
+  "brand": {
+    "@type": "Brand",
+    "name": "OpenShop"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "4.99",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "seller": {
+      "@type": "Organization",
+      "name": "OpenShop"
+    }
+  }
+}

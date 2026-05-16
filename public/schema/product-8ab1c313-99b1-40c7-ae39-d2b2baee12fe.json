@@ -1,0 +1,22 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Professional Resume Template Bundle",
+  "description": "20+ professionally designed resume templates for Microsoft Word and Google Docs. Includes matching cover letter templates and ATS-optimized formats.",
+  "url": "https://scsc.qzz.io/product/8ab1c313-99b1-40c7-ae39-d2b2baee12fe",
+  "category": "Templates",
+  "brand": {
+    "@type": "Brand",
+    "name": "OpenShop"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "4.99",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "seller": {
+      "@type": "Organization",
+      "name": "OpenShop"
+    }
+  }
+}

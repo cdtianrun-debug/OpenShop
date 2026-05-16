@@ -1,0 +1,22 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Modern Gradient Backgrounds Pack",
+  "description": "Beautiful gradient backgrounds for web design, social media, and presentations.",
+  "url": "https://scsc.qzz.io/product/b21cd37d-f593-47be-8cef-05e8d0ecd582",
+  "category": "Design Assets",
+  "brand": {
+    "@type": "Brand",
+    "name": "OpenShop"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "2.99",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "seller": {
+      "@type": "Organization",
+      "name": "OpenShop"
+    }
+  }
+}

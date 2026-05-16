@@ -8,38 +8,56 @@ import { registerRoutes } from './routes/index.js'
 
 const app = new Hono()
 
+// Google Search Console Verification - returns native Response to bypass middleware
+app.get('/google-site-verification=HiKfI-NGA143JWXOxU4i1O4JzFqoNJYeyer6n_OvCUU', (c) => {
+  return new Response('google-site-verification=HiKfI-NGA143JWXOxU4i1O4JzFqoNJYeyer6n_OvCUU', {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-cache'
+    }
+  })
+})
+
 // Security headers middleware (applied to all routes)
+// This must run AFTER the handler, so headers are added to the response
 app.use('*', async (c, next) => {
   await next()
   
-  // Security headers
-  c.header('X-Content-Type-Options', 'nosniff')
-  c.header('X-Frame-Options', 'DENY')
-  c.header('X-XSS-Protection', '1; mode=block')
-  c.header('Referrer-Policy', 'strict-origin-when-cross-origin')
-  c.header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
-  
-  // Content Security Policy
-  const csp = [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: https: blob:",
-    "font-src 'self' data:",
-    "connect-src 'self' https://api.stripe.com https://*.stripe.com https://oauth2.googleapis.com https://www.googleapis.com",
-    "frame-src https://js.stripe.com https://hooks.stripe.com",
-    "frame-ancestors 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "upgrade-insecure-requests"
-  ].join('; ')
-  
-  c.header('Content-Security-Policy', csp)
-  
-  // Strict Transport Security (only on HTTPS)
-  const url = new URL(c.req.url)
-  if (url.protocol === 'https:') {
-    c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
+  // Only add headers if response hasn't been sent yet
+  // Check if we can modify headers
+  try {
+    c.header('X-Content-Type-Options', 'nosniff', { append: false })
+    c.header('X-Frame-Options', 'DENY', { append: false })
+    c.header('X-XSS-Protection', '1; mode=block', { append: false })
+    c.header('Referrer-Policy', 'strict-origin-when-cross-origin', { append: false })
+    c.header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()', { append: false })
+    
+    // Content Security Policy
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https: blob:",
+      "font-src 'self' data:",
+      "connect-src 'self' https://api.stripe.com https://*.stripe.com https://oauth2.googleapis.com https://www.googleapis.com",
+      "frame-src https://js.stripe.com https://hooks.stripe.com",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "upgrade-insecure-requests"
+    ].join('; ')
+    
+    c.header('Content-Security-Policy', csp, { append: false })
+    
+    // Strict Transport Security (only on HTTPS)
+    const url = new URL(c.req.url)
+    if (url.protocol === 'https:') {
+      c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload', { append: false })
+    }
+  } catch (e) {
+    // Headers may already be sent for native Response objects
+    console.log('Could not set security headers:', e.message)
   }
 })
 
@@ -85,86 +103,14 @@ registerRoutes(app)
 // Error handler (must be last)
 app.onError(errorHandler)
 
-// Handle static assets using Workers Assets
 app.get('*', async (c) => {
   const url = new URL(c.req.url)
   const pathname = url.pathname
   
-  // Skip API routes - they're handled above
-  if (pathname.startsWith('/api/')) {
-    return c.notFound()
-  }
-  
-  try {
-    // Try to serve the requested file first
-    if (pathname !== '/' && !pathname.startsWith('/admin') && !pathname.startsWith('/collections') && !pathname.startsWith('/products') && !pathname.startsWith('/success')) {
-      const asset = await c.env.ASSETS.fetch(c.req)
-      if (asset.ok) {
-        return asset
-      }
-    }
-    
-    // For SPA routes (/admin, /collections, etc.) or root, serve index.html
-    const indexUrl = new URL(c.req.url)
-    indexUrl.pathname = '/index.html'
-    const indexRequest = new Request(indexUrl, c.req)
-    const indexAsset = await c.env.ASSETS.fetch(indexRequest)
-    
-    if (indexAsset.ok) {
-      return indexAsset
-    } else {
-      throw new Error('index.html not found')
-    }
-  } catch (error) {
-    console.error('Error serving static asset:', error, 'for path:', pathname)
-    
-    // Fallback HTML for when assets can't be loaded
-    return c.html(`
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>OpenShop - Loading Error</title>
-          <style>
-            body { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-              text-align: center; 
-              padding: 50px 20px; 
-              background: linear-gradient(135deg, #9333ea 0%, #2563eb 100%);
-              color: white;
-              margin: 0;
-              min-height: 100vh;
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-            }
-            .container { max-width: 500px; }
-            h1 { font-size: 3rem; margin-bottom: 1rem; }
-            .error { font-size: 1.2rem; margin: 20px 0; opacity: 0.9; }
-            .help { font-size: 1rem; margin-top: 30px; opacity: 0.8; }
-            a { color: white; text-decoration: underline; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h1>OpenShop</h1>
-            <div class="error">Application loading error</div>
-            <p>The application assets could not be loaded.</p>
-            <div class="help">
-              <p>Try:</p>
-              <ul style="text-align: left; display: inline-block;">
-                <li>Refreshing the page</li>
-                <li>Checking your internet connection</li>
-                <li>Contacting support if the issue persists</li>
-              </ul>
-            </div>
-          </div>
-        </body>
-      </html>
-    `, 500)
-  }
+  // All other routes: let ASSETS handle (returns correct files or SPA fallback)
+  // With run_worker_first=false, Assets already handles static files with correct MIME
+  // Worker only gets requests that Assets can't serve
+  return c.env.ASSETS.fetch(c.req)
 })
 
 export default app

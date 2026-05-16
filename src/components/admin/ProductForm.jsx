@@ -18,6 +18,7 @@ import {
 } from '../ui/alert-dialog'
 import { Switch } from '../ui/switch'
 import { adminApiRequest } from '../../lib/auth'
+import { centsToDisplay, displayToCents } from '../../lib/utils'
 
 export function ProductForm({ product, onSave, onCancel }) {
   const [formData, setFormData] = useState({
@@ -53,8 +54,19 @@ export function ProductForm({ product, onSave, onCancel }) {
       setFormData({
         ...product,
         tagline: product.tagline || product.description || '',
-        images: Array.isArray(product.images) ? product.images : 
-               (product.imageUrl ? [product.imageUrl] : [''])
+        // Price stored in cents; display in dollars for UX
+        price: product.price != null ? centsToDisplay(product.price) : '',
+        images: Array.isArray(product.images) ? product.images :
+               (product.imageUrl ? [product.imageUrl] : ['']),
+        // Variant prices also in cents → convert to display dollars
+        variants: (product.variants || []).map(v => ({
+          ...v,
+          price: v.hasCustomPrice && v.price != null ? centsToDisplay(v.price) : v.price
+        })),
+        variants2: (product.variants2 || []).map(v => ({
+          ...v,
+          price: v.hasCustomPrice && v.price != null ? centsToDisplay(v.price) : v.price
+        }))
       })
       setEnableVariants1(!!(product.variants && product.variants.length > 0 || product.variantStyle))
       setEnableVariants2(!!(product.variants2 && product.variants2.length > 0 || product.variantStyle2))
@@ -78,11 +90,12 @@ export function ProductForm({ product, onSave, onCancel }) {
     }
   }
 
+  // Convert display dollars back to cents on save
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: name === 'price' ? value : value
     }))
   }
 
@@ -186,7 +199,8 @@ export function ProductForm({ product, onSave, onCancel }) {
     try {
       const productData = {
         ...formData,
-        price: parseFloat(formData.price),
+        // Convert display dollars to cents for storage
+        price: displayToCents(formData.price),
         images: formData.images.filter(img => img.trim() !== ''),
         variants: (formData.variants || []).map(v => ({ 
           id: v.id || generateId(), 
@@ -194,7 +208,7 @@ export function ProductForm({ product, onSave, onCancel }) {
           selectorImageUrl: v.selectorImageUrl || v.imageUrl || v.displayImageUrl || '',
           displayImageUrl: v.displayImageUrl || v.imageUrl || v.selectorImageUrl || '',
           hasCustomPrice: !!v.hasCustomPrice,
-          price: v.hasCustomPrice ? parseFloat(v.price || '0') : undefined,
+          price: v.hasCustomPrice ? displayToCents(v.price) : undefined,
         })),
         variants2: (formData.variants2 || []).map(v => ({
           id: v.id || generateId(),
@@ -202,7 +216,7 @@ export function ProductForm({ product, onSave, onCancel }) {
           selectorImageUrl: v.selectorImageUrl || v.imageUrl || v.displayImageUrl || '',
           displayImageUrl: v.displayImageUrl || v.imageUrl || v.selectorImageUrl || '',
           hasCustomPrice: !!v.hasCustomPrice,
-          price: v.hasCustomPrice ? parseFloat(v.price || '0') : undefined,
+          price: v.hasCustomPrice ? displayToCents(v.price) : undefined,
         })),
       }
 

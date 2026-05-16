@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { normalizeImageUrl } from '../../lib/utils'
+import { normalizeImageUrl, formatCurrency } from '../../lib/utils'
 import { Link } from 'react-router-dom'
 import { Button } from '../ui/button'
 import { useCart } from '../../contexts/CartContext'
@@ -200,7 +200,7 @@ export function Navbar({ previewSettings, disableNavigation }) {
                                     {product.name}
                                   </p>
                                   <p className="text-sm storefront-subtle font-semibold">
-                                    ${product.price}
+                                    {formatCurrency(product.price, product.currency)}
                                   </p>
                                 </div>
                               </div>
@@ -212,7 +212,7 @@ export function Navbar({ previewSettings, disableNavigation }) {
                           to={`/collections/${collection.id}`}
                           className="text-sm storefront-subtle hover:text-slate-700 font-medium"
                           >
-                            View all {collection.name} â†’
+                            View all {collection.name} â†?
                           </NavLink>
                         </div>
                       </div>
@@ -320,7 +320,7 @@ export function Navbar({ previewSettings, disableNavigation }) {
                           </div>
                           <div className="flex-1">
                             <p className="font-medium storefront-heading truncate">{product.name}</p>
-                            <p className="storefront-subtle font-semibold">${product.price}</p>
+                            {formatCurrency(product.price, product.currency)}
                           </div>
                         </div>
                       </NavLink>
@@ -330,7 +330,7 @@ export function Navbar({ previewSettings, disableNavigation }) {
                       className="block px-3 py-2 text-sm storefront-subtle hover:text-slate-700 font-medium border-t border-slate-200 pt-2 mt-2"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      View Collection â†’
+                      View Collection â†?
                     </NavLink>
                     {collection.products.length > 5 && (
                       <NavLink
@@ -338,7 +338,7 @@ export function Navbar({ previewSettings, disableNavigation }) {
                         className="block px-3 py-2 text-sm storefront-subtle hover:text-slate-700 font-medium"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        View all {collection.products.length} products â†’
+                        View all {collection.products.length} products â†?
                       </NavLink>
                     )}
                   </div>

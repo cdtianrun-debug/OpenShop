@@ -1,0 +1,22 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Figma Masterclass",
+  "description": "Complete video course on Figma design tool. Learn UI/UX design from scratch.",
+  "url": "https://scsc.qzz.io/product/f04bd1c8-adf7-4bd9-b6a4-47cd99be526f",
+  "category": "Video Courses",
+  "brand": {
+    "@type": "Brand",
+    "name": "OpenShop"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "9.99",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "seller": {
+      "@type": "Organization",
+      "name": "OpenShop"
+    }
+  }
+}

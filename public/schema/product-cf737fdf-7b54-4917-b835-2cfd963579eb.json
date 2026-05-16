@@ -1,0 +1,22 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "AI Prompt Library",
+  "description": "Collection of 500+ AI prompts for ChatGPT, Claude, and other AI tools. Boost your productivity.",
+  "url": "https://scsc.qzz.io/product/cf737fdf-7b54-4917-b835-2cfd963579eb",
+  "category": "Productivity",
+  "brand": {
+    "@type": "Brand",
+    "name": "OpenShop"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "2.99",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "seller": {
+      "@type": "Organization",
+      "name": "OpenShop"
+    }
+  }
+}

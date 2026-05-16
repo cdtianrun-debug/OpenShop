@@ -1,0 +1,22 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Premium UI Icon Pack",
+  "description": "1000+ premium UI icons for web and mobile applications. Multiple formats included.",
+  "url": "https://scsc.qzz.io/product/b0d92180-79d8-47af-859c-c233f377ec86",
+  "category": "Design Assets",
+  "brand": {
+    "@type": "Brand",
+    "name": "OpenShop"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "4.99",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "seller": {
+      "@type": "Organization",
+      "name": "OpenShop"
+    }
+  }
+}

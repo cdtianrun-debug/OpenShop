@@ -23,10 +23,18 @@ export class ProductService {
   }
 
   /**
-   * Get single product by ID
+   * Get single product by ID or slug
    */
-  async getProduct(id) {
-    const product = await this.kv.getProduct(id)
+  async getProduct(idOrSlug) {
+    // First try direct ID lookup
+    let product = await this.kv.getProduct(idOrSlug)
+    
+    // If not found, try slug lookup
+    if (!product) {
+      const allProducts = await this.kv.getAllProducts()
+      product = allProducts.find(p => p.slug === idOrSlug && !p.archived)
+    }
+    
     if (!product) {
       throw new NotFoundError('Product not found')
     }

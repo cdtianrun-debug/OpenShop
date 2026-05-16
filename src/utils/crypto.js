@@ -14,6 +14,19 @@ export function getCrypto() {
 }
 
 /**
+ * Generates a random UUID
+ * @returns {string} - UUID string
+ */
+export function generateId() {
+  const cryptoObj = getCrypto()
+  if (typeof cryptoObj.randomUUID === 'function') {
+    return cryptoObj.randomUUID()
+  }
+  // Fallback: generate UUID-like string
+  return randomHex(16).replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5')
+}
+
+/**
  * Generates random hex string
  * @param {number} bytes - Number of bytes (default: 16)
  * @returns {string} - Hex string

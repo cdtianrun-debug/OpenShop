@@ -10,6 +10,14 @@ export function Cart() {
   const handleCheckout = async () => {
     if (items.length === 0) return
 
+    // Validate all items have a valid Stripe Price ID
+    const invalidItems = items.filter(item => !item.stripePriceId || !item.stripePriceId.startsWith('price_'))
+    if (invalidItems.length > 0) {
+      const names = invalidItems.map(i => i.name || 'Unknown product').join(', ')
+      alert(`Some items are not yet available for purchase: ${names}. Please remove them or check back later.`)
+      return
+    }
+
     try {
       if (items.length === 1) {
         // Single item checkout

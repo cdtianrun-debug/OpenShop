@@ -3,6 +3,7 @@ import { Hono } from 'hono'
 import { CollectionService } from '../../services/CollectionService.js'
 import { getKVNamespace } from '../../utils/kv.js'
 import { asyncHandler } from '../../middleware/errorHandler.js'
+import { generateId } from '../../utils/crypto.js'
 
 const router = new Hono()
 
@@ -17,6 +18,12 @@ router.get('/', asyncHandler(async (c) => {
 // Create collection
 router.post('/', asyncHandler(async (c) => {
   const collectionData = await c.req.json()
+  
+  // Auto-generate ID if not provided
+  if (!collectionData.id) {
+    collectionData.id = generateId()
+  }
+  
   const kvNamespace = getKVNamespace(c.env)
   const collectionService = new CollectionService(kvNamespace)
   const savedCollection = await collectionService.createCollection(collectionData)

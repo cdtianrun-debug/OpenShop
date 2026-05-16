@@ -818,7 +818,7 @@ function FulfillmentManager() {
                         )}
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="text-right font-semibold text-[var(--admin-text-primary)] text-sm">{formatCurrency((order.amount_total || 0) / 100, order.currency?.toUpperCase() || 'USD')}</div>
+                        <div className="text-right font-semibold text-[var(--admin-text-primary)] text-sm">{formatCurrency(order.amount_total || 0, order.currency?.toUpperCase() || 'USD')}</div>
                         <Button variant="outline" size="sm" onClick={() => openOrderModal(order)} className="h-8">
                           View
                         </Button>
@@ -866,7 +866,7 @@ function FulfillmentManager() {
                     <p className="text-[var(--admin-text-secondary)]"><span className="text-[var(--admin-text-muted)]">Name:</span> {selectedOrder.customer_name || 'Unknown'}</p>
                     <p className="text-[var(--admin-text-secondary)]"><span className="text-[var(--admin-text-muted)]">Email:</span> {selectedOrder.customer_email || 'Not provided'}</p>
                     <p className="text-[var(--admin-text-secondary)]"><span className="text-[var(--admin-text-muted)]">Order Date:</span> {new Date(selectedOrder.created * 1000).toLocaleString()}</p>
-                    <p className="text-[var(--admin-text-secondary)]"><span className="text-[var(--admin-text-muted)]">Total:</span> {formatCurrency((selectedOrder.amount_total || 0) / 100, selectedOrder.currency?.toUpperCase() || 'USD')}</p>
+                    <p className="text-[var(--admin-text-secondary)]"><span className="text-[var(--admin-text-muted)]">Total:</span> {formatCurrency(selectedOrder.amount_total || 0, selectedOrder.currency?.toUpperCase() || 'USD')}</p>
                     {selectedOrder.fulfillment?.fulfilled && (
                       <p className="text-[var(--admin-success)] font-medium text-sm">
                         ✓ Fulfilled on {new Date(selectedOrder.fulfillment.fulfilledAt).toLocaleDateString()}
@@ -934,7 +934,7 @@ function FulfillmentManager() {
                         <p className="text-xs text-[var(--admin-text-secondary)]">Quantity: {item.quantity}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-[var(--admin-text-primary)] text-sm">{formatCurrency((item.amount_total || 0) / 100, item.currency?.toUpperCase() || 'USD')}</p>
+                        <p className="font-medium text-[var(--admin-text-primary)] text-sm">{formatCurrency(item.amount_total || 0, item.currency?.toUpperCase() || 'USD')}</p>
                       </div>
                     </div>
                   ))}
